@@ -1,0 +1,3 @@
+module wiretap
+
+go 1.27.2
