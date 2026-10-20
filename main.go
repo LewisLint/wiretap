@@ -6,6 +6,7 @@ import (
 )
 
 var File string
+var Linktype uint32
 
 func main() {
 	File = os.Args[1]

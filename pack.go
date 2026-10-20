@@ -46,8 +46,17 @@ func pack() {
 		panic(err)
 	}
 	fmt.Printf("Packet data (%d bytes):\n%x\n", len(data), data)
-	targ := binary.BigEndian.Uint16(data[0:6])
-	src := binary.BigEndian.Uint16(data[6:12])
-	fmt.Printf("Target MAC addr: %x\nSource MAC addr: %x\n", targ, src)
+	//	targ := binary.BigEndian.Uint16(data[0:6])
+	//	src := binary.BigEndian.Uint16(data[6:12])
+	ipver := data[14] >> 4
+	ihl := data[14] & 0x0f
+	iface := binary.BigEndian.Uint16(data[12:14])
+	plength := data[16:18]
+	Dplength := binary.BigEndian.Uint16(plength)
+	fmt.Printf("Target MAC addr: %x\nSource MAC addr: %x\n", data[0:6], data[6:12])
+	fmt.Printf("EtherType: %04x\n", iface)
+	fmt.Printf("IP Ver: IPv%x\nIPv%x Header Length: %d\n", ipver, ipver, ihl*4)
+	fmt.Printf("IPv%x Total Packet Length: %x (Num: %d)\n", ipver, plength, Dplength)
+	fmt.Printf("Total Packet Length: %d\n", Dplength)
 
 }
