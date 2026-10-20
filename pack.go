@@ -1,7 +1,9 @@
 package main
 
 import (
+	"encoding/binary"
 	"fmt"
+	"io"
 	"os"
 )
 
@@ -23,7 +25,8 @@ func pack() {
 
 	timestamp1 := parse(pack[24:28]) // seconds since the epoch was captured
 	timestamp2 := parse(pack[28:32]) // fractional part of the timestamp (microseconds)
-	length := parse(pack[32:36])     // packet length
+	secondsfrac := float64(timestamp2) / 1000000.0
+	length := parse(pack[32:36]) // packet length
 	oglength := parse(pack[36:40])
 	fmt.Printf("BINARY: \n")
 	fmt.Printf("Timestamp [24:28]: %x\n", timestamp1)
@@ -33,8 +36,18 @@ func pack() {
 
 	fmt.Printf("NUMERIC:\n")
 	fmt.Printf("Timestamp (seconds) [24:28]: %v\n", timestamp1)
-	fmt.Printf("Timestamp Fraction (microseconds) [28:32]: %v (0.%v seconds)\n", timestamp2, timestamp2)
+	fmt.Printf("Timestamp Fraction (microseconds) [28:32]: %v (%v seconds)\n", timestamp2, secondsfrac)
 	fmt.Printf("Packet Length (bytes) [32:36]: %v\n", length)
 	fmt.Printf("Packet Origional Length (bytes) [36:40]: %v\n", oglength)
+
+	data := make([]byte, length) // length = 98
+	_, err = io.ReadFull(file, data)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Printf("Packet data (%d bytes):\n%x\n", len(data), data)
+	targ := binary.BigEndian.Uint16(data[0:6])
+	src := binary.BigEndian.Uint16(data[6:12])
+	fmt.Printf("Target MAC addr: %x\nSource MAC addr: %x\n", targ, src)
 
 }
